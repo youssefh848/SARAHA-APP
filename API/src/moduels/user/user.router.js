@@ -1,15 +1,17 @@
 import { Router } from "express";
 import { confirmEmail, login, registration, resendOtp } from "./user.controller.js";
 import { checkEmail } from "../../middelware/checkEmail.js";
-import { validateUser } from "../../middelware/validation.js";
+import { isValid } from "../../middelware/validation.js";
+import { errorHandler } from "../../middelware/errorHandellar.js";
+import { signVal } from "./user.validation.js";
 
 
 
 const userRouter = Router()
-userRouter.post('/registration', validateUser(), checkEmail, registration)
+userRouter.post('/registration', isValid(signVal), checkEmail, errorHandler(registration))
 userRouter.post('/login', login)
-userRouter.post('/verifyEmail', confirmEmail)
-userRouter.get('/resendOTP/:token', resendOtp)
+userRouter.post('/verifyEmail', errorHandler(confirmEmail))
+userRouter.get('/resendOTP/:token', errorHandler(resendOtp))
 
 
 

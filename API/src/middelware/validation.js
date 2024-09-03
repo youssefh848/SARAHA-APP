@@ -1,54 +1,14 @@
-import { addMessageVal } from "../moduels/message/message.validation.js";
-import { signVal } from "../moduels/user/user.validation.js"
 import { AppError } from "../utils/appError.js";
 
-export const validateUser = () => {
+export const isValid = (schema) => {
     return (req, res, next) => {
-        const { error } = signVal.validate(req.body, { abortEarly: false });
-
-        if (!error) {
-            next();
-        } else {
-            /* res.status(400).json({
-                message: "Validation failed",
-                errors: error.details.map(detail => ({
-                    field: detail.path[0],
-                    message: detail.message
-                }))
-            }); */
-            next(new AppError(
-                "Validation failed",
-                400,
-                error.details.map(detail => ({
-                    field: detail.path[0],
-                    message: detail.message
-                }))
-            ));
+        let data = { ...req.body, ...req.params, ...req.query }
+        const { error } = schema.validate(data, { abortEarly: false })
+        if (error) {
+            const errorMessage = error.details.map(detail => detail.message).join(', ');
+            return next(new AppError(errorMessage, 400));
+            
         }
-    };
-};
-export const validateMessage = () => {
-    return (req, res, next) => {
-        const { error } = addMessageVal.validate(req.body, { abortEarly: false });
-
-        if (!error) {
-            next();
-        } else {
-           /*  res.status(400).json({
-                message: "Validation failed",
-                errors: error.details.map(detail => ({
-                    field: detail.path[0],
-                    message: detail.message
-                }))
-            }); */
-            next(new AppError(
-                "Validation failed",
-                400,
-                error.details.map(detail => ({
-                    field: detail.path[0],
-                    message: detail.message
-                    }))
-                    ));
-        }
-    };
-};
+        next()
+    }
+}
